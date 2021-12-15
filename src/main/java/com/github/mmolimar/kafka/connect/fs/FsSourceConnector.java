@@ -14,12 +14,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FsSourceConnector extends SourceConnector {
 
     private static Logger log = LoggerFactory.getLogger(FsSourceConnector.class);
 
     private FsSourceConnectorConfig config;
+
+    // datav fix
+    public static final AtomicInteger taskCount = new AtomicInteger(1);
 
     @Override
     public String version() {
@@ -61,6 +65,7 @@ public class FsSourceConnector extends SourceConnector {
 
         log.debug("{} Partitions grouped as: {}", this, taskConfigs);
 
+        taskCount.set(taskConfigs.size());
         return taskConfigs;
     }
 

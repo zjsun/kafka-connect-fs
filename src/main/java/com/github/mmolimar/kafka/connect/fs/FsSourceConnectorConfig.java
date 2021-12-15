@@ -1,5 +1,6 @@
 package com.github.mmolimar.kafka.connect.fs;
 
+import com.github.mmolimar.kafka.connect.fs.util.ConfigUtils;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Importance;
@@ -31,7 +32,7 @@ public class FsSourceConnectorConfig extends AbstractConfig {
 
     public static ConfigDef conf() {
         int order = 0;
-        return new ConfigDef()
+        ConfigDef config = new ConfigDef()
                 .define(
                         FS_URIS,
                         Type.LIST,
@@ -53,6 +54,7 @@ public class FsSourceConnectorConfig extends AbstractConfig {
                         ConfigDef.Width.LONG,
                         TOPIC_DISPLAY
                 );
+        return ConfigUtils.configDkeMode(config);
     }
 
     public List<String> getFsUris() {

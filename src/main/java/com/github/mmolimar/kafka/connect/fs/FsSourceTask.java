@@ -4,6 +4,7 @@ import com.github.mmolimar.kafka.connect.fs.file.FileMetadata;
 import com.github.mmolimar.kafka.connect.fs.file.reader.AbstractFileReader;
 import com.github.mmolimar.kafka.connect.fs.file.reader.FileReader;
 import com.github.mmolimar.kafka.connect.fs.policy.Policy;
+import com.github.mmolimar.kafka.connect.fs.util.ConfigUtils;
 import com.github.mmolimar.kafka.connect.fs.util.ReflectionUtils;
 import com.github.mmolimar.kafka.connect.fs.util.Version;
 import org.apache.kafka.common.config.ConfigException;
@@ -117,7 +118,18 @@ public class FsSourceTask extends SourceTask {
             log.trace("{} Waiting [{}] ms for next poll.", this, pollInterval);
             time.sleep(pollInterval);
         }
+
+        checkIfTaskDone();
         return null;
+    }
+
+    void checkIfTaskDone() {
+        if (ConfigUtils.isDkeTaskMode(this.config) && policy.hasEnded()) {
+            if (FsSourceConnector.taskCount.decrementAndGet() <= 0) {
+                // do something finally if needed
+            }
+            throw new ConnectException(ConfigUtils.MSG_DONE);// force task stop
+        }
     }
 
     private Stream<FileMetadata> filesToProcess() {
