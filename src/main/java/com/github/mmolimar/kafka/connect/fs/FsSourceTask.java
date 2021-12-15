@@ -1,6 +1,7 @@
 package com.github.mmolimar.kafka.connect.fs;
 
 import com.datav.scdf.kafka.common.ConfigUtils;
+import com.datav.scdf.kafka.common.TaskUtils;
 import com.github.mmolimar.kafka.connect.fs.file.FileMetadata;
 import com.github.mmolimar.kafka.connect.fs.file.reader.AbstractFileReader;
 import com.github.mmolimar.kafka.connect.fs.file.reader.FileReader;
@@ -18,7 +19,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -86,7 +94,7 @@ public class FsSourceTask extends SourceTask {
             List<Map<String, Object>> partitions = filesToProcess.stream().map(makePartitionKey).collect(Collectors.toList());
 
             // 仅在stream中需要读取offset
-            Map<Map<String, Object>, Map<String, Object>> offsets = ConfigUtils.isDkeTaskMode(config)? Collections.emptyMap() : context.offsetStorageReader().offsets(partitions);
+            Map<Map<String, Object>, Map<String, Object>> offsets = ConfigUtils.isDkeTaskMode(config) ? Collections.emptyMap() : context.offsetStorageReader().offsets(partitions);
 
             List<SourceRecord> totalRecords = filesToProcess.stream().map(metadata -> {
                 List<SourceRecord> records = new ArrayList<>();
@@ -121,17 +129,8 @@ public class FsSourceTask extends SourceTask {
             time.sleep(pollInterval);
         }
 
-        checkIfTaskDone();
+        if (policy.hasEnded()) TaskUtils.taskDone(config, FsSourceConnector.taskCount, null, false);
         return null;
-    }
-
-    void checkIfTaskDone() {
-        if (ConfigUtils.isDkeTaskMode(this.config) && policy.hasEnded()) {
-            if (FsSourceConnector.taskCount.decrementAndGet() <= 0) {
-                // do something finally if needed
-            }
-            throw new ConnectException(ConfigUtils.MSG_DONE);// force task stop
-        }
     }
 
     private Stream<FileMetadata> filesToProcess() {
