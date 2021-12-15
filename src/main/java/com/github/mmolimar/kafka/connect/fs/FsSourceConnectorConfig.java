@@ -1,6 +1,6 @@
 package com.github.mmolimar.kafka.connect.fs;
 
-import com.github.mmolimar.kafka.connect.fs.util.ConfigUtils;
+import com.datav.scdf.kafka.common.ConfigUtils;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Importance;

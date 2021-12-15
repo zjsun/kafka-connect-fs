@@ -1,10 +1,10 @@
 package com.github.mmolimar.kafka.connect.fs;
 
+import com.datav.scdf.kafka.common.ConfigUtils;
 import com.github.mmolimar.kafka.connect.fs.file.FileMetadata;
 import com.github.mmolimar.kafka.connect.fs.file.reader.AbstractFileReader;
 import com.github.mmolimar.kafka.connect.fs.file.reader.FileReader;
 import com.github.mmolimar.kafka.connect.fs.policy.Policy;
-import com.github.mmolimar.kafka.connect.fs.util.ConfigUtils;
 import com.github.mmolimar.kafka.connect.fs.util.ReflectionUtils;
 import com.github.mmolimar.kafka.connect.fs.util.Version;
 import org.apache.kafka.common.config.ConfigException;
@@ -84,7 +84,9 @@ public class FsSourceTask extends SourceTask {
             // Fetch all the offsets upfront to avoid fetching offsets once per file
             List<FileMetadata> filesToProcess = filesToProcess().collect(Collectors.toList());
             List<Map<String, Object>> partitions = filesToProcess.stream().map(makePartitionKey).collect(Collectors.toList());
-            Map<Map<String, Object>, Map<String, Object>> offsets = context.offsetStorageReader().offsets(partitions);
+
+            // 仅在stream中需要读取offset
+            Map<Map<String, Object>, Map<String, Object>> offsets = ConfigUtils.isDkeTaskMode(config)? Collections.emptyMap() : context.offsetStorageReader().offsets(partitions);
 
             List<SourceRecord> totalRecords = filesToProcess.stream().map(metadata -> {
                 List<SourceRecord> records = new ArrayList<>();
