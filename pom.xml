@@ -80,6 +80,20 @@
         <project.repository.host>http://121.36.152.60:8081</project.repository.host>
     </properties>
 
+    <!--  私服Nexus -->
+    <distributionManagement>
+        <repository>
+            <id>datav-releases</id>
+            <name>Nexus Release Repository</name>
+            <url>${project.repository.host}/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>datav-snapshots</id>
+            <name>Nexus Snapshot Repository</name>
+            <url>${project.repository.host}/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>com.datav.scdf</groupId>
